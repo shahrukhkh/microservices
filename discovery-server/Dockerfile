@@ -1,17 +1,14 @@
-# Use an official Java runtime as a base image
-FROM eclipse-temurin:17-jdk-alpine
-
-# Create app directory
+# --- Stage 1: Build the JAR ---
+FROM maven:3.9.9-eclipse-temurin-17 AS builder
 WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-# Copy jar from target folder into container
-COPY target/*.jar app.jar
-
-# Expose the service port
+# --- Stage 2: Run the JAR ---
+FROM eclipse-temurin:17-jdk-alpine
+WORKDIR /app
+COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8761
-
-# Set profile for docker environment
 ENV SPRING_PROFILES_ACTIVE=docker
-
-# Run the jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
