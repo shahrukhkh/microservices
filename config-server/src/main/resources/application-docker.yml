@@ -4,11 +4,11 @@ server:
 spring:
   application:
     name: config-server
-  profiles:
-    active: native
   cloud:
     config:
       server:
-        native:
-          search-locations: file:/config-repo
+        git:
+          uri: https://github.com/shahrukhkh/config-repo.git
+          clone-on-start: true
+          default-label: main
 
