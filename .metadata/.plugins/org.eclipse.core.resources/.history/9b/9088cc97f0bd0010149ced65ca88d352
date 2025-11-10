@@ -1,0 +1,17 @@
+# Use an official Java runtime as a base image
+FROM eclipse-temurin:17-jdk-alpine
+
+# Create app directory
+WORKDIR /app
+
+# Copy jar from target folder into container
+COPY target/*.jar app.jar
+
+# Expose the service port
+EXPOSE 8095
+
+# Set profile for docker environment
+ENV SPRING_PROFILES_ACTIVE=docker
+
+# Run the jar
+ENTRYPOINT ["java", "-jar", "app.jar"]

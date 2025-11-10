@@ -1,0 +1,100 @@
+version: "3.8"
+
+services:
+    # 🧩 CONFIG SERVER
+    config-server:
+        build: ./config-server
+        container_name: config-server
+        ports:
+            - "8888:8888"
+        environment:
+            - SPRING_PROFILES_ACTIVE=docker
+        volumes:
+            - ./config-repo:/config-repo
+        networks:
+            - spring
+
+    # 🛰️ DISCOVERY SERVER (Eureka)
+    discovery-server:
+        build: ./discovery-server
+        container_name: discovery-server
+        ports:
+            - "8761:8761"
+        depends_on:
+            - config-server
+        environment:
+            - SPRING_PROFILES_ACTIVE=docker
+            - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+        networks:
+            - spring
+
+    # 🌐 API GATEWAY
+    api-gateway:
+        build: ./api-gateway
+        container_name: api-gateway
+        ports:
+            - "8080:8080"
+        depends_on:
+            - config-server
+            - discovery-server
+        environment:
+            - SPRING_PROFILES_ACTIVE=docker
+            - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+        networks:
+            - spring
+
+    # 📦 ORDER MICRO SERVICE
+    order-ms:
+        build: ./order-ms
+        container_name: order-ms
+        ports:
+            - "8082:8082"
+        depends_on:
+            - config-server
+            - discovery-server
+            - mysql
+        environment:
+            - SPRING_PROFILES_ACTIVE=docker
+            - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+        networks:
+            - spring
+
+    # 📦 PRODUCT MICRO SERVICE
+    product-ms:
+        build: ./product-ms
+        container_name: product-ms
+        ports:
+            - "8083:8083"
+        depends_on:
+            - config-server
+            - discovery-server
+            - mysql
+        environment:
+            - SPRING_PROFILES_ACTIVE=docker
+            - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+        networks:
+            - spring
+
+    # 🗄️ MYSQL DATABASE
+    mysql:
+        image: mysql:8.0
+        container_name: mysql
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: appdb
+            MYSQL_USER: appuser
+            MYSQL_PASSWORD: apppass
+        ports:
+            - "3306:3306"
+        volumes:
+            - mysql_data:/var/lib/mysql
+        networks:
+            - spring
+
+networks:
+    spring:
+        driver: bridge
+
+volumes:
+    mysql_data:
