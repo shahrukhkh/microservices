@@ -11,7 +11,7 @@ public class RestCon {
 	@GetMapping("/msg")
 	public String getMsg()
 	{
-		return "Order";
+		return "Product";
 	}
 
 }
