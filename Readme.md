@@ -16,7 +16,7 @@ step: cd microservices/
 step: sudo docker-compose up -d
 step: sudo docker ps
 step: sudo docker images
-step: sudo docker logs config-server -f
+step: sudo docker logs config-server  OR sudo docker logs config-server -f
 step: http://<your-ip>:8080/order-ms/order/msg
 
 
